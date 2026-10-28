@@ -1,8 +1,8 @@
 # Leitor de Imagens
 
-Aplicação em Streamlit que recebe uma imagem, gera uma legenda com o modelo
-BLIP e a traduz para português com MarianMT, usando modelos da biblioteca
-Transformers.
+Aplicação em Streamlit que recebe uma imagem, gera uma legenda com BLIP,
+detecta objetos com DETR e traduz a legenda e os rótulos para português usando
+modelos da biblioteca Transformers.
 
 ## Requisitos
 
