@@ -58,7 +58,7 @@ def load_models() -> tuple[Any, Any]:
 	)
 	translator = pipeline(
 		"translation",
-		model="Helsinki-NLP/opus-mt-en-pt",
+		model="Helsinki-NLP/opus-mt-en-ROMANCE",
 	)
 	return captioner, translator
 
@@ -85,18 +85,29 @@ if uploaded_file is not None:
 
 		if st.button("Descrever imagem", type="primary", use_container_width=True):
 			try:
-				with st.spinner("Analisando a imagem..."):
+				with st.spinner(
+					"Carregando os modelos. Na primeira execução, isso pode levar alguns minutos..."
+				):
 					captioner, translator = load_models()
-					caption_result = captioner(image, max_new_tokens=60)
-					english_caption = caption_result[0]["generated_text"].strip()
-					translation_result = translator(english_caption, max_new_tokens=100)
-					portuguese_caption = translation_result[0]["translation_text"].strip()
-
-				st.subheader("Descrição")
-				st.success(portuguese_caption)
 			except Exception as error:
 				st.error(
-					"Não foi possível gerar a descrição. Confira sua conexão com a internet "
-					"e tente novamente."
+					"Não foi possível carregar os modelos. Na primeira execução, eles são "
+					"baixados do Hugging Face; a rede pode estar lenta ou bloquear os arquivos."
 				)
-				st.caption(f"Detalhe técnico: {error}")
+				st.code(f"{type(error).__name__}: {error}", language="text")
+			else:
+				try:
+					with st.spinner("Analisando a imagem..."):
+						caption_result = captioner(image, max_new_tokens=60)
+						english_caption = caption_result[0]["generated_text"].strip()
+						translation_result = translator(
+							f">>pt<< {english_caption}",
+							max_new_tokens=100,
+						)
+						portuguese_caption = translation_result[0]["translation_text"].strip()
+
+					st.subheader("Descrição")
+					st.success(portuguese_caption)
+				except Exception as error:
+					st.error("Os modelos foram carregados, mas a análise da imagem falhou.")
+					st.code(f"{type(error).__name__}: {error}", language="text")
